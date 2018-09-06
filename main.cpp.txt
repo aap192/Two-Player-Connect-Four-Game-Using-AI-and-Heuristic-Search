@@ -1,0 +1,1395 @@
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+
+
+using namespace std;
+
+class ConnectFour
+{
+  private:
+
+      char a[7][8];
+      struct suc{
+      int xc;
+      int yc;
+      };
+
+      int totalNodes=0;
+      int totalNodesAlpha=0;
+      int totalNodesE=0;
+      int totalNodesEAlpha=0;
+      size_t cnMemory;
+      size_t cnMemoryMin;
+      size_t cnMemoryAlpha;
+
+      string evO; // evaluation function for O
+      string evX; // evaluation function for X
+      char alX ;  // algorithm for X
+      char alO ;  // algorithm for O
+
+
+  public:
+
+    // function to return the memory
+    size_t memoryUtilized()
+    {
+            return cnMemory;
+    }
+
+    // function to generate random numbers
+    int randonNumber()
+    {
+        int r = rand()% 7 +1;
+        cnMemory += sizeof(r);
+        return r;
+    }
+
+    int randonX(int numb)
+    {
+        int r1= rand()% numb;
+        cnMemory  +=  sizeof(r1);
+        return r1;
+    }
+
+    // Initialize the board
+    ConnectFour()
+    {
+
+        cnMemory += sizeof(totalNodes);
+        cnMemory += sizeof(totalNodesE);
+        cnMemory += sizeof(a);
+        a[0][0]=' ';
+        for(int i=0; i<7; i++)
+        {
+            for(int j=0; j<8; j++)
+            {
+                //if(a[i][j] != a[0][0])
+                    a[i][j]='-';
+
+            }
+        }
+        for(int i=1;i<7; i++)
+        {
+           int v= 7-i;
+           a[i][0]= '0'+v;
+        }
+        for(int j=1; j<8; j++)
+        {
+           a[0][j]= '0'+j;
+        }
+
+        cout<<"Initial State"<<endl<<endl;
+        for(int i=0; i<7; i++)
+        {
+            for(int j=0; j<8; j++)
+            {
+                cout<<a[i][j]<<"    ";
+            }
+            cout<<endl;
+        }
+        cout<<endl;
+        cout<<endl;
+    }
+
+    //function to display the board
+    void displayB()
+    {
+        cnMemory  +=  sizeof(int);
+         for(int i=0; i<7; i++)
+        {
+            for(int j=0; j<8; j++)
+            {
+                cout<<a[i][j]<<"    ";
+            }
+            cout<<endl;
+        }
+        cout<<endl;
+        cout<<endl;
+    }
+
+    // function to count the number of elements on the board
+    int countBoardContent()
+    {
+        int bCon=0;
+        cnMemory  +=  sizeof(bCon);
+        for(int i=1; i<7; i++)
+        {
+            for(int j=1; j<8; j++)
+            {
+                if(a[i][j] != '-')
+                {
+                    bCon++;
+                }
+            }
+        }
+        return bCon;
+    }
+
+    // to check whether the move is validate or not
+    bool validateMove(int x1, int y1)
+    {
+            if(a[7-x1][y1] != '-')
+            {
+                return false;
+            }
+
+            if(x1 != 1)
+            {
+                int v1= x1-1;
+                if(a[7-v1][y1] == '-' )
+                {
+                    return false;
+                }
+            }
+            return true;
+    }
+
+    bool checkNoOptimal(int a[], int sze)
+    {
+        cnMemory  +=  sizeof(int);
+        for(int i=1; i<sze; i++)
+        {
+            if(a[0] != a[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // function to perform a move
+   // void performMove(string strInp, char ev1)
+    void performMove()
+    {
+        int x2;
+        int y2;
+
+        bool win42;
+        win42=false;
+
+        cnMemory  +=  sizeof(x2);
+        cnMemory  +=  sizeof(y2);
+
+        srand(time(NULL));
+
+        bool wi;
+        cnMemory  +=  sizeof(wi);
+
+        for(int i =0; i<42; i=i+2)
+        {
+            int cnMoves = countBoardContent();
+            cnMemory  +=  sizeof(cnMoves);
+            if(cnMoves < 4)
+            {
+                bool maxTurn=true;
+                bool minTurn=true;
+                cnMemory  +=  sizeof(maxTurn);
+                cnMemory  +=  sizeof(minTurn);
+
+                while(maxTurn == true)
+                {
+                    bool isV;
+                    cnMemory  +=  sizeof(isV);
+                    int maxY=randonNumber();
+                    cnMemory  +=  sizeof(maxY);
+                    isV= validateMove(1,maxY);
+                    if(isV == true)
+                    {
+                        cout<<"Player X move"<<endl<<endl;
+                        a[6][maxY]= 'X';
+                        totalNodes++;
+                        totalNodesAlpha++;
+                        maxTurn =false;
+                        displayB();
+                        cout<<"-----------------------------------------------"<<endl<<endl;
+                    }
+                }
+
+                while(minTurn == true)
+                {
+                    bool isV1;
+                    int maxY1=randonNumber();
+                    cnMemory += sizeof(isV1);
+                    cnMemory += sizeof(maxY1);
+                    isV1= validateMove(1,maxY1);
+                    if(isV1 == true)
+                    {
+                        cout<<"Player O move"<<endl<<endl;
+                        a[6][maxY1]= 'O';
+                        totalNodes++;
+                        totalNodesAlpha++;
+                        minTurn =false;
+                        displayB();
+                        cout<<"-----------------------------------------------"<<endl<<endl;
+                    }
+                }
+
+            }
+            else
+            {
+
+            // maximizer
+
+            int maxBest=-1000;
+            int scr11=0;
+            int xRM;
+            int yRM;
+            cnMemory  +=  sizeof(maxBest);
+            cnMemory  +=  sizeof(scr11);
+            cnMemory  +=  sizeof(xRM);
+            cnMemory  +=  sizeof(yRM);
+
+            int cnSuc11= findSuccCount();
+            cnMemory  +=  sizeof(cnSuc11);
+            suc sfM[cnSuc11];
+            cnMemory  +=  sizeof(sfM);
+            int *a1=new int[cnSuc11];
+
+            displSuc(sfM);
+
+            for(int i=0; i< cnSuc11; i++)
+            {
+                totalNodes++;
+                totalNodesAlpha++;
+                bool isWinn;
+                int xc2 = sfM[i].xc;
+                int yc2 = sfM[i].yc;
+                cnMemory  +=  sizeof(isWinn);
+                cnMemory  +=  sizeof(xc2);
+                cnMemory  +=  sizeof(yc2);
+
+
+                a[7-xc2][yc2]='X';
+
+                if( alX == 'A')
+                   {
+                       if(  evX == "ev1" )
+                       {
+                           scr11= minimax(a,0,false);
+                       }
+
+                       else
+                       {
+                           scr11= minimaxB(a,0,false);
+                       }
+                   }
+
+                   else if(alX == 'B')
+                   {
+                       if(  evX == "ev1" )
+                       {
+                            scr11= minimaxAlphaBeta(a,0,false,-1000,1000);
+                       }
+
+                       else
+                       {
+                            scr11= minimaxAlphaBetaB(a,0,false,-1000,1000);
+                       }
+                   }
+
+
+                /*
+                if(strInp == "minimax")
+                {
+                    if(ev1 == 'A')
+                        scr11= minimax(a,0,false);
+
+                    if(ev1 == 'B')
+                        scr11= minimaxB(a,0, false);
+                }
+                else if(strInp == "alphabeta")
+                {
+                     if(ev1 == 'A')
+                        scr11= minimaxAlphaBeta(a,0,false,-1000,1000);
+
+                    if(ev1 == 'B')
+                        scr11= minimaxAlphaBetaB(a,0,false,-1000,1000);
+
+                }
+                */
+
+                cout<<xc2<<","<<yc2<<" Score-"<<scr11<<endl;
+                a1[i]=scr11;
+
+                if(scr11 > maxBest)
+                {
+                    maxBest = scr11;
+                    xRM=xc2;
+                    yRM=yc2;
+                }
+                a[7-xc2][yc2]='-';
+            }
+
+            cout<<endl;
+            bool re= checkNoOptimal(a1,cnSuc11);
+            cnMemory  +=  sizeof(re);
+            if(re == true)
+            {
+               int r4= randonX(cnSuc11);
+               cnMemory += sizeof(r4);
+               xRM=  sfM[r4].xc;
+               yRM=  sfM[r4].yc;
+            }
+
+
+            a[7-xRM][yRM]='X';
+
+            wi = isWinner(xRM,yRM,'X');
+            if(wi == true)
+            {
+                     cout<<"Player X move"<<endl<<endl;
+                    displayB();
+                    cout<<"-----------------------------------------------"<<endl<<endl;
+                    cout<<"Player X wins"<<endl<<endl;
+                    win42=true;
+                    break;
+            }
+            else
+            {
+                a[7-xRM][yRM]='-';
+                for(int y1=0; y1< cnSuc11; y1++)
+                {
+                  bool isWinn;
+                  cnMemory  +=  sizeof(isWinn);
+                  int xc21 = sfM[y1].xc;
+                  int yc21 = sfM[y1].yc;
+                  a[7-xc21][yc21]='O';
+                  isWinn = isWinner(xc21,yc21,'O');
+                  if(isWinn == true)
+                  {
+                    xRM=xc21;
+                    yRM=yc21;
+                    a[7-xc21][yc21]='-';
+                    break;
+                  }
+                  a[7-xc21][yc21]='-';
+
+                }
+            }
+            a[7-xRM][yRM]='X';
+            cout<<"Player X move"<<endl<<endl;
+            displayB();
+            cout<<"-----------------------------------------------"<<endl<<endl;
+
+
+
+            // minimizer;
+            int minBest=1000;
+            int scr1=0;
+            int xR;
+            int yR;
+
+            cnMemory += sizeof(minBest);
+            cnMemory += sizeof(scr1);
+            cnMemory += sizeof(xR);
+            cnMemory += sizeof(yR);
+
+            int cnSuc= findSuccCount();
+            suc sf[cnSuc];
+            cnMemory += sizeof(cnSuc);
+
+            displSuc(sf);
+
+            for(int i=0; i< cnSuc; i++)
+            {
+                totalNodes++;
+                totalNodesAlpha++;
+                bool iW;
+                int xc2 = sf[i].xc;
+                int yc2 = sf[i].yc;
+                cnMemory += sizeof(iW);
+                cnMemory += sizeof(xc2);
+                cnMemory += sizeof(yc2);
+                /*
+                a[7-xc2][yc2]='O';
+                iW = isWinner(xc2,yc2,'O');
+                if (iW == true )
+                {
+                    xR=xc2;
+                    yR=yc2;
+                    a[7-xc2][yc2]='-';
+                    break;
+                }
+                */
+
+                a[7-xc2][yc2]='O';
+
+
+                if( alO == 'A')
+                   {
+                       if(  evO == "ev1" )
+                       {
+                           scr1= minimax(a,0,true);
+                       }
+
+                       else
+                       {
+                           scr1= minimaxB(a,0,true);
+                       }
+                   }
+
+                   else if(alO== 'B')
+                   {
+                       if(  evO == "ev1" )
+                       {
+                            scr1= minimaxAlphaBeta(a,0,true,-1000,1000);
+                       }
+
+                       else
+                       {
+                            scr1= minimaxAlphaBetaB(a,0,true,-1000,1000);
+                       }
+                   }
+
+                /*
+                if(strInp == "minimax")
+                {
+                    if(ev1 == 'A')
+                        scr1= minimax(a,0,true);
+
+                    if(ev1== 'B')
+                        scr1= minimaxB(a,0,true);
+                }
+                else if(strInp == "alphabeta")
+                {
+                    if(ev1 == 'A')
+                        scr1= minimaxAlphaBeta(a,0,true,-1000,1000);
+
+                    if(ev1== 'B')
+                        scr1= minimaxAlphaBetaB(a,0,true,-1000,1000);
+                }
+                */
+
+
+                cout<<xc2<<","<<yc2<<" Score-"<<scr1<<endl;
+                if(scr1 <= minBest)
+                {
+                    minBest = scr1;
+                    xR=xc2;
+                    yR=yc2;
+                }
+                a[7-xc2][yc2]='-';
+            }
+
+            cout<<endl;
+            a[7-xR][yR]='O';
+
+            wi = isWinner(xR,yR,'O');
+            if(wi == true)
+            {
+
+                    cout<<"Player O move"<<endl<<endl;
+                    displayB();
+                    cout<<"-----------------------------------------------"<<endl<<endl;
+                    cout<<"Player O wins"<<endl<<endl;
+                    win42=true;
+                    break;
+            }
+            else
+            {
+                a[7-xR][yR]='-';
+                for(int y1=0; y1< cnSuc; y1++)
+                {
+                  bool isWinn;
+                  int xc22 = sf[y1].xc;
+                  int yc22 = sf[y1].yc;
+                    cnMemory += sizeof(isWinn);
+                    cnMemory += sizeof(xc22);
+                    cnMemory += sizeof(yc22);
+                  a[7-xc22][yc22]='X';
+                  isWinn = isWinner(xc22,yc22,'X');
+                  if(isWinn == true)
+                  {
+                    xR=xc22;
+                    yR=yc22;
+                    a[7-xc22][yc22]='-';
+                    break;
+                  }
+                  a[7-xc22][yc22]='-';
+
+                }
+            }
+
+            a[7-xR][yR]='O';
+            cout<<"Player O move"<<endl<<endl;
+            displayB();
+            cout<<"-----------------------------------------------"<<endl<<endl;
+
+            }
+        }
+
+        int cnC=0;
+        cnC= countBoardContent();
+        if(cnC == 42)
+        {
+            if(win42 == false)
+                cout<<"The game is drawn."<<endl<<endl;
+        }
+
+        if( alX== 'A' && alO== 'A' )
+        {
+            cout<<"Total number of nodes generated using MINMAX-A-B: "<<totalNodes<<endl;
+            cout<<"Total number of nodes expanded using MINMAX-A-B: "<<totalNodesE<<endl<<endl;
+            cout<<"Total memory used using MINMAX-A-B:"<<cnMemory+cnMemoryMin<<" BYTES"<<endl;
+        }
+        else if( alX== 'B' && alO== 'B' )
+        {
+            cout<<"Total number of nodes generated using ALPHA-BETA-SEARCH: "<<totalNodesAlpha<<endl;
+            cout<<"Total number of nodes expanded using ALPHA-BETA-SEARCH: "<<totalNodesEAlpha<<endl<<endl;
+            cout<<"Total memory used using ALPHA-BETA-SEARCH:"<<cnMemory+cnMemoryAlpha<<" BYTES"<<endl;
+        }
+        else
+        {
+            cout<<"Total number of nodes generated using MINMAX-A-B: "<<totalNodes<<endl;
+            cout<<"Total number of nodes expanded using MINMAX-A-B: "<<totalNodesE<<endl<<endl;
+            cout<<"Total number of nodes generated using ALPHA-BETA-SEARCH: "<<totalNodesAlpha<<endl;
+            cout<<"Total number of nodes expanded using ALPHA-BETA-SEARCH: "<<totalNodesEAlpha<<endl<<endl;
+            cout<<"Total memory used using MINMAX-A-B:"<<cnMemory+cnMemoryMin<<" BYTES"<<endl;
+            cout<<"Total memory used using ALPHA-BETA-SEARCH:"<<cnMemory+cnMemoryAlpha<<" BYTES"<<endl;
+        }
+
+    }
+
+    int  findSuccCount()
+    {
+        int succCn=0;
+        for(int i=1; i<8; i++)
+        {
+            for(int i1=1; i1<7; i1++)
+            {
+                bool f1;
+                f1=validateMove(i1,i);
+                if(f1 == true)
+                {
+                    succCn++;
+                }
+            }
+        }
+        return succCn;
+    }
+
+    // to generate the successors (MOVE GENERATOR)
+    void displSuc(suc sf1[])
+    {
+        int cSuc=0;
+
+        for(int i=1; i<8; i++)
+        {
+            for(int i1=1; i1<7; i1++)
+            {
+                bool f1;
+                f1=validateMove(i1,i);
+                if(f1 == true)
+                {
+                    sf1[cSuc].xc=i1;
+                    sf1[cSuc].yc=i;
+                    cSuc++;
+                }
+            }
+        }
+    }
+
+    // function to decide the winner
+    bool isWinner(int x3, int y3, char c)
+    {
+            // to detect 4 dots in a row
+            int countRow=0;
+            int y31=0;
+            y31= y3-1;
+            while(  y31 > 0 )
+            {
+                if(a[7-x3][y31] == c)
+                {
+                    countRow++;
+                }
+                else
+                {
+                    break;
+                }
+                y31=y31-1;
+            }
+
+            int y32=0;
+            y32= y3 + 1;
+            while(y32 < 8)
+            {
+                if(a[7-x3][y32] == c)
+                {
+                    countRow++;
+                }
+                else
+                {
+                    break;
+                }
+                y32=y32+1;
+            }
+            if(countRow >= 3)
+            {
+                return true;
+            }
+
+            // to detect 4 dots in a column
+            int countCol=0;
+            int x31=0;
+            x31= x3-1;
+            while(  x31 > 0 )
+            {
+                if(a[7-x31][y3] == c)
+                {
+                    countCol++;
+                }
+                else
+                {
+                    break;
+                }
+                x31=x31-1;
+            }
+
+            int x32=0;
+            x32= x3 + 1;
+            while(x32 < 7)
+            {
+                if(a[7-x32][y3] == c)
+                {
+                    countCol++;
+                }
+                else
+                {
+                    break;
+                }
+                x32=x32+1;
+            }
+            if(countCol >= 3)
+            {
+                return true;
+            }
+
+            // to connect 4 dots in left diagonal
+
+            int countDiaLeft=0;
+            int countDiaRight=0;
+
+        int xlt1=0;
+        int ylt1=0;
+        xlt1= x3 -1;
+        ylt1= y3 -1;
+
+        while( xlt1 > 0 && ylt1 > 0 )
+        {
+            if(a[7 - xlt1][ylt1] == c)
+            {
+                countDiaLeft++;
+            }
+            else
+            {
+                break;
+            }
+            xlt1= xlt1-1;
+            ylt1= ylt1 -1;
+        }
+
+        int xl2=0;
+        int yl2=0;
+        xl2= x3+1;
+        yl2= y3+1;
+
+        while(xl2 < 7 && yl2 < 8)
+        {
+            if(a[7 - xl2][yl2] == c)
+            {
+                countDiaLeft++;
+            }
+            else
+            {
+                break;
+            }
+            xl2= xl2+1;
+            yl2= yl2 +1;
+        }
+
+        if(countDiaLeft >= 3)
+        {
+            return true;
+        }
+
+        // to connect 4 dots in right diagonal
+
+        int xrt1=0;
+        int yrt1=0;
+        xrt1= x3 -1;
+        yrt1= y3 +1;
+
+        while( xrt1 > 0 && yrt1 < 8 )
+        {
+            if(a[7 - xrt1][yrt1] == c)
+            {
+                countDiaRight++;
+            }
+            else
+            {
+                break;
+            }
+            xrt1= xrt1-1;
+            yrt1= yrt1+1;
+        }
+
+        int xr2=0;
+        int yr2=0;
+        xr2= x3+1;
+        yr2= y3-1;
+
+        while(xr2 < 7 && yr2 > 0)
+        {
+            if(a[7 - xr2][yr2] == c)
+            {
+                countDiaRight++;
+            }
+            else
+            {
+                break;
+            }
+            xr2= xr2+1;
+            yr2= yr2-1;
+        }
+
+        if(countDiaRight >= 3)
+        {
+            return true;
+        }
+        else return false;
+}
+
+    // To decide whether the search should continue or not based on the value of depth
+    bool deepEnough(char a[7][8], int depth1)
+    {
+        if(depth1 >=4 )
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    // MINMAX-A-B algorithm
+    int minimax(char a[7][8], int depth, bool isMax)
+    {
+            int scr3=0;
+            cnMemoryMin  +=  sizeof(scr3);
+            bool checkDepth= deepEnough(a,depth);
+            cnMemoryMin  +=  sizeof(checkDepth);
+
+            if( checkDepth == false  )
+            {
+
+            int cntCont;
+
+            if(isMax == true)
+            {
+                // calling evaluation function to check if the player O is winning
+
+                    scr3=evaluate(a,'O');
+                    if(scr3 == -10)
+                    {
+                        return (scr3+depth);
+                    }
+            }
+            else
+            {
+                // calling evaluation function to check if the player X is winning
+
+                scr3= evaluate(a,'X');
+                if(scr3 == 10)
+                {
+                    return(scr3-depth);
+                }
+            }
+
+            // to check if its a draw based on the position of the board.
+             cntCont= countBoardContent();
+             if(cntCont == 42)
+             {
+                 return 0;
+             }
+
+             if(isMax == true)
+             {
+                 int bestMax= -1000;
+                 int cnSucNodes;
+                 int cuMax=0;
+                 cnMemoryMin  +=  sizeof(bestMax);
+                 cnMemoryMin  +=  sizeof(cnSucNodes);
+                 cnMemoryMin  +=  sizeof(cuMax);
+
+
+                 cnSucNodes = findSuccCount();
+                 suc sMax[cnSucNodes];
+                 displSuc(sMax);
+
+                 if(cnSucNodes > 0)
+                 {
+                    totalNodesE++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodes; i1++)
+                 {
+                     totalNodes++;
+                     int xc3=sMax[i1].xc;
+                     int yc3= sMax[i1].yc;
+                     cnMemoryMin  +=  sizeof(xc3);
+                     cnMemoryMin  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='X';
+                     cuMax= minimax(a,depth+1,false);
+                     if(cuMax > bestMax )
+                     {
+                         bestMax = cuMax;
+                     }
+                     a[7-xc3][yc3]='-';
+                 }
+
+                 return (bestMax);
+             }
+
+            else
+            {
+                 int bestMin = 1000;
+                 int cnSucNodesMin;
+                 cnSucNodesMin= findSuccCount();
+                 int cuMin=0;
+                 cnMemoryMin  +=  sizeof(bestMin);
+                 cnMemoryMin  +=  sizeof(cnSucNodesMin);
+                 cnMemoryMin  +=  sizeof(cuMin);
+
+                 suc sMin[cnSucNodesMin];
+                 displSuc(sMin);
+
+                 if(cnSucNodesMin > 0)
+                 {
+                     totalNodesE++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodesMin; i1++)
+                 {
+                     totalNodes++;
+                     int xc3=sMin[i1].xc;
+                     int yc3= sMin[i1].yc;
+                     cnMemoryMin  +=  sizeof(xc3);
+                     cnMemoryMin  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='O';
+                     cuMin= minimax(a,depth+1,true);
+                     if(cuMin < bestMin )
+                     {
+                         bestMin = cuMin;
+                     }
+                     a[7-xc3][yc3]='-';
+                 }
+
+                 return (bestMin);
+            }
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    // ALPHA-BETA-Search algorithm
+    int minimaxAlphaBeta(char a[7][8], int depth, bool isMax, int ah, int bh)
+    {
+            int scr3=0;
+            cnMemoryAlpha  +=  sizeof(scr3);
+            bool checkDepth = deepEnough(a, depth);
+            cnMemoryAlpha  +=  sizeof(checkDepth);
+
+            if( checkDepth == false )
+            {
+
+            int cntCont;
+
+            if(isMax == true)
+            {
+                  scr3=evaluate(a,'O');
+                    if(scr3 == -10)
+                    {
+                        return (scr3+depth);
+                    }
+            }
+            else
+            {
+
+                    scr3=evaluate(a,'X');
+                    if(scr3 == 10)
+                    {
+                        return (scr3-depth);
+                    }
+            }
+
+             cntCont= countBoardContent();
+             if(cntCont == 42)
+             {
+                 return 0;
+             }
+
+             if(isMax == true)
+             {
+                 int bestMax= -1000;
+                 int cnSucNodes;
+                 int cuMax=0;
+                 cnMemoryAlpha  +=  sizeof(bestMax);
+                 cnMemoryAlpha  +=  sizeof(cnSucNodes);
+                 cnMemoryAlpha  +=  sizeof(cuMax);
+
+                 cnSucNodes = findSuccCount();
+                 suc sMax[cnSucNodes];
+                 displSuc(sMax);
+
+                 if(cnSucNodes > 0)
+                 {
+                     totalNodesEAlpha++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodes; i1++)
+                 {
+                     totalNodesAlpha++;
+
+                     int xc3=sMax[i1].xc;
+                     int yc3= sMax[i1].yc;
+                     cnMemoryAlpha  +=  sizeof(xc3);
+                     cnMemoryAlpha  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='X';
+                     cuMax= minimaxAlphaBeta(a,depth+1,false,ah, bh);
+                     if(cuMax > bestMax )
+                     {
+                         bestMax = cuMax;
+                     }
+
+                     a[7-xc3][yc3]='-';
+                     ah= max(ah, bestMax);
+                     if(bh <= ah )
+                     {
+                         break;
+                     }
+                 }
+
+                 return (bestMax);
+             }
+
+            else
+            {
+                 int bestMin = 1000;
+                 int cnSucNodesMin;
+                 cnSucNodesMin= findSuccCount();
+                 int cuMin=0;
+
+                 cnMemoryAlpha  +=  sizeof(bestMin);
+                 cnMemoryAlpha  +=  sizeof(cnSucNodesMin);
+                 cnMemoryAlpha  +=  sizeof(cuMin);
+
+                 suc sMin[cnSucNodesMin];
+                 displSuc(sMin);
+
+                 if(cnSucNodesMin >0)
+                 {
+                     totalNodesEAlpha++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodesMin; i1++)
+                 {
+                     totalNodesAlpha++;
+                     int xc3=sMin[i1].xc;
+                     int yc3= sMin[i1].yc;
+                     cnMemoryAlpha  +=  sizeof(xc3);
+                     cnMemoryAlpha  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='O';
+                     cuMin= minimaxAlphaBeta(a,depth+1,true,ah,bh);
+                     if(cuMin < bestMin )
+                     {
+                         bestMin = cuMin;
+                     }
+                     a[7-xc3][yc3]='-';
+                     bh= min(bh, bestMin);
+                     if(bh <= ah)
+                     {
+                         break;
+                     }
+                 }
+
+                 return (bestMin);
+            }
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    // The function which returns a score based on the move made by the player.
+    // If player X is winning then it returns 10, If player O is winning then it returns -10.
+    // If nobody is winning then it returns 0.
+    int evaluate(char a[7][8],char player)
+    {
+        for(int i=1;i<8;i++)
+        {
+                for(int i1=1; i1<7; i1++)
+                {
+                    if(a[7-i1][i] == player)
+                    {
+                        bool res;
+                        res = isWinner(i1,i,player);
+                        cnMemory  +=  sizeof(res);
+                        if(res == true)
+                        {
+                            if(player == 'X')
+                            {
+                                return 10;
+                            }
+                            else
+                            {
+                                return -10;
+                            }
+                        }
+                    }
+                }
+        }
+        return 0;
+    }
+
+    int minimaxB(char a[7][8], int depth , bool isMax)
+    {
+            int scr3=0;
+            bool checkDepth = deepEnough(a,depth);
+            cnMemoryMin  +=  sizeof(scr3);
+            cnMemoryMin  +=  sizeof(checkDepth);
+            if( checkDepth == false  )
+            {
+
+            int cntCont;
+
+            if(isMax == true)
+            {
+                // calling evaluation function to check if the player O is winning
+                scr3=evaluateB(a,'O');
+                if(scr3 != 0)
+                {
+                    return scr3;
+                }
+            }
+            else
+            {
+                // calling evaluation function to check if the player X is winning
+                scr3= evaluateB(a,'X');
+                if(scr3 != 0)
+                {
+                    return scr3;
+                }
+            }
+
+            // to check if its a draw based on the position of the board.
+             cntCont= countBoardContent();
+             if(cntCont == 42)
+             {
+                 return 0;
+             }
+
+             if(isMax == true)
+             {
+                 int bestMax= -1000;
+                 int cnSucNodes;
+                 int cuMax=0;
+                 cnMemoryMin  +=  sizeof(bestMax);
+                 cnMemoryMin  +=  sizeof(cnSucNodes);
+                 cnMemoryMin  +=  sizeof(cuMax);
+                 cnSucNodes = findSuccCount();
+                 suc sMax[cnSucNodes];
+                 displSuc(sMax);
+
+                 if(cnSucNodes > 0)
+                 {
+                    totalNodesE++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodes; i1++)
+                 {
+                     totalNodes++;
+                     int xc3=sMax[i1].xc;
+                     int yc3= sMax[i1].yc;
+                     cnMemoryMin  +=  sizeof(xc3);
+                     cnMemoryMin  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='X';
+                     cuMax= minimaxB(a,depth+1,false);
+                     if(cuMax > bestMax )
+                     {
+                         bestMax = cuMax;
+                     }
+                     a[7-xc3][yc3]='-';
+                 }
+
+                 return (bestMax);
+             }
+
+            else
+            {
+                 int bestMin = 1000;
+                 int cnSucNodesMin;
+                 cnSucNodesMin= findSuccCount();
+                 int cuMin=0;
+                 cnMemoryMin  +=  sizeof(bestMin);
+                 cnMemoryMin  +=  sizeof(cnSucNodesMin);
+                 cnMemoryMin  +=  sizeof(cuMin);
+                 suc sMin[cnSucNodesMin];
+                 displSuc(sMin);
+
+                 if(cnSucNodesMin > 0)
+                 {
+                     totalNodesE++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodesMin; i1++)
+                 {
+                     totalNodes++;
+                     int xc3=sMin[i1].xc;
+                     int yc3= sMin[i1].yc;
+                     cnMemoryMin  +=  sizeof(xc3);
+                     cnMemoryMin  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='O';
+                     cuMin= minimaxB(a,depth+1,true);
+                     if(cuMin < bestMin )
+                     {
+                         bestMin = cuMin;
+                     }
+                     a[7-xc3][yc3]='-';
+                 }
+
+                 return (bestMin);
+            }
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    // ALPHA-BETA-Search algorithm
+    int minimaxAlphaBetaB(char a[7][8], int depth, bool isMax, int ah, int bh)
+    {
+            int scr3=0;
+            bool checkDepth = deepEnough(a, depth);
+            cnMemoryAlpha  +=  sizeof(scr3);
+            cnMemoryAlpha  +=  sizeof(checkDepth);
+            if( checkDepth == false )
+            {
+
+            int cntCont;
+
+            if(isMax == true)
+            {
+                // calling evaluation function to check if the player O is winning
+                scr3=evaluateB(a,'O');
+                if(scr3 != 0)
+                {
+                        return (scr3);
+                }
+            }
+            else
+            {
+                // calling evaluation function to check if the player X is winning
+                scr3= evaluateB(a,'X');
+                if(scr3 != 0)
+                {
+                    return(scr3);
+                }
+            }
+
+             cntCont= countBoardContent();
+             if(cntCont == 42)
+             {
+                 return 0;
+             }
+
+             if(isMax == true)
+             {
+                 int bestMax= -1000;
+                 int cnSucNodes;
+                 int cuMax=0;
+                 cnMemoryAlpha  +=  sizeof(bestMax);
+                 cnMemoryAlpha  +=  sizeof(cnSucNodes);
+                 cnMemoryAlpha  +=  sizeof(cuMax);
+                 cnSucNodes = findSuccCount();
+                 suc sMax[cnSucNodes];
+                 displSuc(sMax);
+
+                 if(cnSucNodes > 0)
+                 {
+                     totalNodesEAlpha++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodes; i1++)
+                 {
+                     totalNodesAlpha++;
+                     int xc3=sMax[i1].xc;
+                     int yc3= sMax[i1].yc;
+                     cnMemoryAlpha  +=  sizeof(xc3);
+                     cnMemoryAlpha  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='X';
+                     cuMax= minimaxAlphaBetaB(a,depth+1,false,ah, bh);
+                     if(cuMax > bestMax )
+                     {
+                         bestMax = cuMax;
+                     }
+
+                     a[7-xc3][yc3]='-';
+                     ah= max(ah, bestMax);
+                     if(bh <= ah )
+                     {
+                         break;
+                     }
+                 }
+
+                 return (bestMax);
+             }
+
+            else
+            {
+                 int bestMin = 1000;
+                 int cnSucNodesMin;
+                 cnSucNodesMin= findSuccCount();
+                 int cuMin=0;
+                 cnMemoryAlpha  +=  sizeof(bestMin);
+                 cnMemoryAlpha  +=  sizeof(cnSucNodesMin);
+                 cnMemoryAlpha  +=  sizeof(cuMin);
+                 suc sMin[cnSucNodesMin];
+                 displSuc(sMin);
+
+                 if(cnSucNodesMin >0)
+                 {
+                     totalNodesEAlpha++;
+                 }
+
+                 for(int i1=0; i1<cnSucNodesMin; i1++)
+                 {
+                     totalNodesAlpha++;
+                     int xc3=sMin[i1].xc;
+                     int yc3= sMin[i1].yc;
+                     cnMemoryAlpha  +=  sizeof(xc3);
+                     cnMemoryAlpha  +=  sizeof(yc3);
+                     a[7-xc3][yc3]='O';
+                     cuMin= minimaxAlphaBetaB(a,depth+1,true,ah,bh);
+                     if(cuMin < bestMin )
+                     {
+                         bestMin = cuMin;
+                     }
+                     a[7-xc3][yc3]='-';
+                     bh= min(bh, bestMin);
+                     if(bh <= ah)
+                     {
+                         break;
+                     }
+                 }
+
+                 return (bestMin);
+            }
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+
+    // The function which returns a score based on the move made by the player.
+    // If player X is winning then it returns (100 - total positions filled) ,
+    // If player O is winning then it returns (-100 + total positions filled).
+    // If nobody is winning then it returns 0.
+    int evaluateB(char a[7][8],char player)
+    {
+        int countCon=0;
+        countCon = countBoardContent();
+        cnMemory  +=  sizeof(countCon);
+
+        for(int i=1;i<8;i++)
+        {
+                for(int i1=1; i1<7 ; i1++)
+                {
+                    if(a[7-i1][i] == player)
+                    {
+                        bool res;
+                        res = isWinner(i1,i,player);
+                        cnMemory  +=  sizeof(res);
+                        if(res == true)
+                        {
+                            if(player == 'X')
+                            {
+                                return (100 - countCon);
+                            }
+                            else
+                            {
+                                return (-100 + countCon) ;
+                            }
+                        }
+                    }
+                }
+        }
+        return 0;
+    }
+
+
+    void option()
+    {
+        string sV;
+        cout<<"Player X please select the algorithm by typing A or B"<<endl;
+        cout<<"A) MINMAX-A-B"<<endl;
+        cout<<"B) ALPHA-BETA-SEARCH"<<endl;
+        cin>>alX;
+
+        cout<<"Player X please select the evaluation function by typing A or B"<<endl;
+        cout<<"A) Evaluation function 1"<<endl;
+        cout<<"B) Evaluation function 2"<<endl;
+        cin>>sV;
+
+        if(sV == "A")
+            evX="ev1";
+
+        if(sV == "B")
+            evX= "ev2";
+
+        cout<<endl;
+        cout<<"Player O please select the algorithm by typing A or B"<<endl;
+        cout<<"A) MINMAX-A-B"<<endl;
+        cout<<"B) ALPHA-BETA-SEARCH"<<endl;
+        cin>>alO;
+
+        cout<<"Player O please select the evaluation function by typing A or B"<<endl;
+        cout<<"A) Evaluation function 1"<<endl;
+        cout<<"B) Evaluation function 2"<<endl;
+        cin>>sV;
+
+        if(sV == "A")
+            evO= "ev1" ;
+
+        if(sV == "B")
+            evO= "ev2" ;
+
+    }
+
+
+};
+
+int main()
+{
+     clock_t startt, endt1;
+     double msecs;
+     char ev;
+     string strInput;
+     int totalPath=0;
+     ConnectFour c;
+     c.option();
+     startt=clock();
+     c.performMove( );
+     endt1=clock();
+     totalPath = c.countBoardContent();
+     msecs = ((double) (endt1 - startt)) / CLOCKS_PER_SEC;
+     cout<<endl;
+     cout<<"Total length of the game path: "<<totalPath<<endl<<endl;
+     cout<<"Total time taken: "<<msecs<<" sec"<<endl;
+   //  cout<<"Total memory:     "<<c.memoryUtilized()<<" bytes"<<endl;
+}
